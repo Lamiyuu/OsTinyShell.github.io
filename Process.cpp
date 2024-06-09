@@ -7,6 +7,8 @@
 #include <sys/types.h>
 #include <psapi.h>
 #include <tlhelp32.h>
+#include <unordered_map>
+#include <string>
 #include "Analyse.h"
 #include "Command.h"
 #include "Conversion.h"
@@ -18,6 +20,7 @@ using namespace std;
 #define TOKEN_DELIMETERS " \t\r\n\a"
 
 HANDLE hForeProcess;
+std::unordered_map<DWORD, std::string> processStates;
 
 ///////////////////////////////////
 //////// Xử lí tiến trình /////////
@@ -237,9 +240,7 @@ int resumeProcess(DWORD process_id) {
  *           pc fg [name_process/path](foreground mode)
  * 
  **/
-
 int createNewProcess(char **args) {
-    // Cài wait time cho các tiến trình
     int wait_time;
     if (strcmp(args[1], "bg") == 0) {
         wait_time = 0;
@@ -247,46 +248,97 @@ int createNewProcess(char **args) {
         wait_time = INFINITE;
     }
 
-    wchar_t *run_file = combinePath(args, 2); // Ghép lại tên tiến trình hoặc đường dẫn
+    wchar_t *run_file = combinePath(args, 2);
+
     STARTUPINFOW si;
     PROCESS_INFORMATION pi;
 
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
-    si.wShowWindow = SW_SHOW;
     si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_SHOW;
 
-    // Chuyển đổi args[1] sang wchar_t* và gán cho si.lpTitle
     wchar_t* title = convertToWideChar(args[1]);
     si.lpTitle = title;
 
     ZeroMemory(&pi, sizeof(pi));
 
-    // Khởi tạo tiến trình con
-    if (!CreateProcessW(NULL, run_file, NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi)) {
-        int error = GetLastError(); // Kiểm tra lỗi
+    DWORD creationFlags = CREATE_NO_WINDOW; // Use this flag for background processes
+    if (strcmp(args[1], "fg") == 0) {
+        creationFlags = CREATE_NEW_CONSOLE; // Default flags for foreground processes
+    }
+
+    if (!CreateProcessW(NULL, run_file, NULL, NULL, FALSE, creationFlags, NULL, NULL, &si, &pi)) {
+        int error = GetLastError();
         if (error == 2)
             std::wcout << L"The batch file or execute file '" << run_file << L"' is not found." << std::endl;
         else
             std::wcout << L"Can't run this file" << std::endl;
         free(run_file);
-        delete[] title; // Giải phóng bộ nhớ cho title
+        delete[] title;
         return 1;
     }
 
-    // gán handle cho tiến trình con vừa tạo
     if (strcmp(args[1], "fg") == 0) {
         hForeProcess = pi.hProcess;
+        processStates[pi.dwProcessId] = "fg";
+    } else {
+        processStates[pi.dwProcessId] = "bg";
     }
 
-    // Thời gian đợi 1 tiến trình con
-    WaitForSingleObject(pi.hProcess, wait_time);
+    if (wait_time != 0) {
+        WaitForSingleObject(pi.hProcess, wait_time);
+    }
 
-    // Đóng các handle
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     free(run_file);
-    delete[] title; // Giải phóng bộ nhớ cho title
+    delete[] title;
 
     return 1;
+}
+BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam) {
+    DWORD processId;
+    GetWindowThreadProcessId(hWnd, &processId);
+
+    if (processId == *((DWORD*)lParam)) {
+        ShowWindow(hWnd, SW_SHOWNORMAL);
+        SetForegroundWindow(hWnd);
+        return FALSE; // Dừng vòng lặp sau khi tìm thấy cửa sổ của tiến trình
+    }
+
+    return TRUE; // Tiếp tục tìm kiếm
+}
+int convertBgtoFg(DWORD processId) {
+    // Kiểm tra xem tiến trình có tồn tại trong danh sách và đang ở trạng thái "bg" hay không
+    auto it = processStates.find(processId);
+    if (it == processStates.end() || it->second != "bg") {
+        std::cout << "Process with ID " << processId << " is not in background state or not found." << std::endl;
+        return 1;
+    }
+
+    // Lấy handle của cửa sổ được focus hiện tại
+    HWND fgWindow = GetForegroundWindow();
+    if (!fgWindow) {
+        std::cout << "Failed to get foreground window." << std::endl;
+        return 1;
+    }
+
+    DWORD fgProcessId;
+    GetWindowThreadProcessId(fgWindow, &fgProcessId);
+
+    // Nếu process ID của cửa sổ được focus trùng với process ID của tiến trình cần chuyển
+    if (fgProcessId == processId) {
+        std::cout << "Process with ID " << processId << " is already in foreground state." << std::endl;
+        return 0;
+    }
+
+    // Chuyển cửa sổ của tiến trình cần chuyển từ background sang foreground
+    ShowWindow(fgWindow, SW_SHOWNORMAL);
+    SetForegroundWindow(fgWindow);
+
+    // Cập nhật trạng thái của tiến trình từ "bg" sang "fg"
+    it->second = "fg";
+
+    return 0;
 }

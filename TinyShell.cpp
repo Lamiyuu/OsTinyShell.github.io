@@ -38,7 +38,7 @@ int main (int argc, char** argv) {
         // cout << "HUST" << endl;
         // sleep(1); 
 
-        // fixCmd(cmd); /* Chỉnh sửa câu lệnh tránh các lỗi nhập cách khoảng */
+        fixCmd(cmd); /* Chỉnh sửa câu lệnh tránh các lỗi nhập cách khoảng */
         char **args =  separate_line(cmd); /* Chia câu lệnh */
             /**
              * VD: dir C:\Users\Admin .....

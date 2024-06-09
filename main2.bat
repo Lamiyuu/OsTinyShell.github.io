@@ -46,7 +46,10 @@ Echo.
 Echo                Show the list Running Processes.
 
 TASKLIST
+Pause
 Echo.
 Echo.
+Echo                 Lam Tu Thong 
+Pause
 Exit
 

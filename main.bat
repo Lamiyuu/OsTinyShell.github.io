@@ -1,6 +1,6 @@
 @echo Off
 Title Project TinyShell
-Color 5
+Color 3
 
 Echo.
 Echo.
@@ -22,7 +22,6 @@ Echo            -------------------
 Echo.
 Echo.
 Echo            An phim bat ki de tiep tuc 
-
 Pause
 Start main2.bat
 Exit

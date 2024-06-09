@@ -36,12 +36,12 @@ void fixCmd(char* cmd){
         }
     }
     int real_len = length - first, i=0;
-//			"     Ta Ton" -> "Ta Tona Ton"
+    // bỏ đi dấu cách đầu dòng nếu có 
     while(real_len--){
         (cmd)[i] = (cmd)[i+first];
         i++;
     }
-    (cmd)[length - first] = '\0'; //"Ta Tona Ton" -> "Ta Ton"
+    (cmd)[length - first] = '\0'; 
 }
 
 /**
@@ -115,7 +115,7 @@ wchar_t* combinePath(char **args, int start) {
 }
 
 /**
- * Đổi màu chữ (Có thể có hoặc k cơ bản là cũng k có ảnh hưởng gì chỉ là trang trí )
+ * Đổi màu chữ 
  * 
  **/
 void setColor(char* color) {
@@ -128,6 +128,6 @@ void setColor(char* color) {
     // saved_attributes = consoleInfo.wAttributes;
 
     if (strcmp(color,"green")==0) {
-      SetConsoleTextAttribute(hConsole,FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+      SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
     }
 }

@@ -20,7 +20,7 @@ void countdown(int total_seconds){
 }
 
 int main() {
-    int time = 300;
+    int time = 90;
     countdown(time);
     return 0;
 }
