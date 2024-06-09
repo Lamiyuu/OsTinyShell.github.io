@@ -256,17 +256,14 @@ int createNewProcess(char **args) {
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_SHOW;
+    si.wShowWindow = (strcmp(args[1], "bg") == 0) ? SW_HIDE : SW_SHOW;
 
     wchar_t* title = convertToWideChar(args[1]);
     si.lpTitle = title;
 
     ZeroMemory(&pi, sizeof(pi));
 
-    DWORD creationFlags = CREATE_NO_WINDOW; // Use this flag for background processes
-    if (strcmp(args[1], "fg") == 0) {
-        creationFlags = CREATE_NEW_CONSOLE; // Default flags for foreground processes
-    }
+    DWORD creationFlags = CREATE_NEW_CONSOLE; // Tạo cửa sổ cmd mới
 
     if (!CreateProcessW(NULL, run_file, NULL, NULL, FALSE, creationFlags, NULL, NULL, &si, &pi)) {
         int error = GetLastError();
@@ -297,48 +294,49 @@ int createNewProcess(char **args) {
 
     return 1;
 }
-BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam) {
-    DWORD processId;
-    GetWindowThreadProcessId(hWnd, &processId);
-
-    if (processId == *((DWORD*)lParam)) {
-        ShowWindow(hWnd, SW_SHOWNORMAL);
-        SetForegroundWindow(hWnd);
-        return FALSE; // Dừng vòng lặp sau khi tìm thấy cửa sổ của tiến trình
-    }
-
-    return TRUE; // Tiếp tục tìm kiếm
+HWND GetProcessWindow(DWORD processId) {
+    HWND hwnd = NULL;
+    do {
+        hwnd = FindWindowEx(NULL, hwnd, NULL, NULL);
+        DWORD pid = 0;
+        GetWindowThreadProcessId(hwnd, &pid);
+        if (pid == processId) {
+            return hwnd;
+        }
+    } while (hwnd != NULL);
+    return NULL;
 }
-int convertBgtoFg(DWORD processId) {
-    // Kiểm tra xem tiến trình có tồn tại trong danh sách và đang ở trạng thái "bg" hay không
+
+void switchProcessMode(DWORD processId) {
     auto it = processStates.find(processId);
-    if (it == processStates.end() || it->second != "bg") {
-        std::cout << "Process with ID " << processId << " is not in background state or not found." << std::endl;
-        return 1;
+    if (it != processStates.end()) {
+        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, processId);
+        if (!hProcess) {
+            std::cerr << "Failed to open process with ID " << processId << std::endl;
+            return;
+        }
+
+        HWND hwnd = GetProcessWindow(processId);
+        if (!hwnd) {
+            std::cerr << "Failed to find window for process with ID " << processId << std::endl;
+            CloseHandle(hProcess);
+            return;
+        }
+
+        if (it->second == "bg") {
+            // Chuyển từ chế độ nền sang tiền cảnh
+            ShowWindow(hwnd, SW_SHOW);
+            processStates[processId] = "fg";
+            hForeProcess = hProcess;
+        } else {
+            // Chuyển từ chế độ tiền cảnh sang nền
+            ShowWindow(hwnd, SW_HIDE);
+            processStates[processId] = "bg";
+            hForeProcess = NULL;
+        }
+
+        CloseHandle(hProcess);
+    } else {
+        std::cerr << "No process found with ID " << processId << std::endl;
     }
-
-    // Lấy handle của cửa sổ được focus hiện tại
-    HWND fgWindow = GetForegroundWindow();
-    if (!fgWindow) {
-        std::cout << "Failed to get foreground window." << std::endl;
-        return 1;
-    }
-
-    DWORD fgProcessId;
-    GetWindowThreadProcessId(fgWindow, &fgProcessId);
-
-    // Nếu process ID của cửa sổ được focus trùng với process ID của tiến trình cần chuyển
-    if (fgProcessId == processId) {
-        std::cout << "Process with ID " << processId << " is already in foreground state." << std::endl;
-        return 0;
-    }
-
-    // Chuyển cửa sổ của tiến trình cần chuyển từ background sang foreground
-    ShowWindow(fgWindow, SW_SHOWNORMAL);
-    SetForegroundWindow(fgWindow);
-
-    // Cập nhật trạng thái của tiến trình từ "bg" sang "fg"
-    it->second = "fg";
-
-    return 0;
 }

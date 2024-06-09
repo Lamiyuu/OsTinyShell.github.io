@@ -27,5 +27,5 @@ int killProcess(wchar_t *name_process);
 int suspendProcess(DWORD process_id);
 int resumeProcess(DWORD process_id);
 int createNewProcess(char **args);
-int convertBgtoFg(DWORD processId);
+void switchProcessMode(DWORD processId);
 #endif

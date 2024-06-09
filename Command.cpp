@@ -501,13 +501,13 @@ int pc(char **args) {
         }
         return 0;
     } 
-    if(strcmp(args[1], "bgToFg") == 0){
+    if(strcmp(args[1], "bgTofg") == 0){
         if(args[2] == NULL) {
             cout << "ERROR: Too few argument" << endl;
             return 0;
         } else{
             DWORD process_id = atoi(args[2]);
-            convertBgtoFg(process_id);
+            switchProcessMode(process_id);
             return 0;
         }
     }
