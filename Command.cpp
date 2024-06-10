@@ -559,7 +559,7 @@ int runbat(char **args){
         while(!feof(f)) {
             fgetws(w, 255, f); // Sử dụng fgetws thay vì fgets để đọc dữ liệu wchar_t
             wcscpy(a, w);
-            char **arg = separate_line(convertToChar(a)); // Chuyển đổi kiểu dữ liệu của dữ liệu đọc được
+            char **arg = separator_line(convertToChar(a)); // Chuyển đổi kiểu dữ liệu của dữ liệu đọc được
             printf("");
             if(cmdCheck(arg)) {
                 int stop = execute(arg);

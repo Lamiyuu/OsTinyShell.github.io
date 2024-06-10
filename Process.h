@@ -20,6 +20,7 @@
 #define TOKEN_DELIMETERS " \t\r\n\a"
 
 /* Các câu lệnh liên quan đến tiến trình */
+void sighandler(int signum);
 int findProcessID(wchar_t *name_process);
 int getProcessListAll();
 int killProcessID(DWORD process_id);

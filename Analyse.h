@@ -20,10 +20,9 @@
 #define TOKEN_DELIMETERS " \t\r\n\a"
 
 void fixCmd(char *cmd);
-void sighandler(int);
 void setColor(char* color);
-char **separate_line(char *line);
-int printPrompt(wchar_t *cur_directory);
+char **separator_line(char *line);
+int printConsolePath(wchar_t *cur_directory);
 wchar_t* combinePath(char **args, int start);
 
 #endif

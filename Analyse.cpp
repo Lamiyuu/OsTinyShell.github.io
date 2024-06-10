@@ -48,12 +48,21 @@ void fixCmd(char* cmd){
  * In ra màn hình console đường dẫn 
  * (VD: C:\Users\Admin\.....> $ *phần tiếp này là lệnh*)
  **/
-int printPrompt(wchar_t *cur_directory){
-    if(GetCurrentDirectoryW(MAX_CWD_LENS,cur_directory) == 0){
-        cout << "Reading of current working directory failed.\n";
+int printConsolePath(wchar_t *cur_directory) {
+    // Lấy đường dẫn đầy đủ của file thực thi
+    if (GetModuleFileNameW(NULL, cur_directory, MAX_CWD_LENS) == 0) {
+        std::wcout << L"Reading of executable path failed.\n";
         return -1;
     }
-    cout << cur_directory << "> $";   
+
+    // Tách phần thư mục từ đường dẫn đầy đủ
+    wchar_t* last_backslash = wcsrchr(cur_directory, L'\\');
+    if (last_backslash != NULL) {
+        *last_backslash = L'\0'; // Kết thúc chuỗi tại vị trí dấu gạch chéo ngược cuối cùng
+    }
+
+    // In phần thư mục và dấu nhắc lệnh
+    std::wcout << cur_directory << L"\\> $";   
     return 1;
 }
 
@@ -61,7 +70,7 @@ int printPrompt(wchar_t *cur_directory){
  * Chia câu lệnh thành các đoạn ngăn cách bởi ký tự ngăn (" ","\t","\r","\n","\a")
  * 
  **/
-char **separate_line(char *line){
+char **separator_line(char *line){
     int bufsize = MAX_TOK_BUFSIZE;
     int position = 0;
     char **tokens = (char**)malloc(bufsize*sizeof(char*));
@@ -75,13 +84,12 @@ char **separate_line(char *line){
     token = strtok(line, TOKEN_DELIMETERS); /*Con trỏ trỏ tới args[0] của lệnh cmd VD: cd, dir*/
     while(token != NULL){
         tokens[position] = token; /* Lưu các con trỏ chứa thành phần của lệnh cmd */
-        // cout << tokens[position] << endl;
         position++; 
         if(position >= bufsize){ /* số thành phần args[i] trong lệnh cmd lớn hơn số bufsize dự tính*/
-            bufsize += MAX_TOK_BUFSIZE; /* Tăng số bufsize */
-            tokens = (char**)realloc(tokens, bufsize); /* Cấp phát thêm bộ nhớ cho tokens */
+            bufsize += MAX_TOK_BUFSIZE; 
+            tokens = (char**)realloc(tokens, bufsize); 
             if(!tokens){
-                cout << "Allocation Failed" << endl; /* Không đủ bộ nhớ cấp phát */
+                cout << "Allocation Failed" << endl; 
                 exit(EXIT_FAILURE);
             } 
         }
@@ -128,6 +136,6 @@ void setColor(char* color) {
     // saved_attributes = consoleInfo.wAttributes;
 
     if (strcmp(color,"green")==0) {
-      SetConsoleTextAttribute(hConsole,FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+      SetConsoleTextAttribute(hConsole,FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     }
 }

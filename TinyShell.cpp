@@ -29,7 +29,7 @@ int main (int argc, char** argv) {
     
     int stop = 0; /**/
     while(!stop) { /* Nếu vẫn chưa stop thì thực hiện nhập và chạy lệnh */
-        if(printPrompt(cur_dir) == -1){ /* Kiểm tra, in ra đường dẫn VD: C:\Users\Admin\> $ .....*/
+        if(printConsolePath(cur_dir) == -1){ /* Kiểm tra, in ra đường dẫn VD: C:\Users\Admin\> $ .....*/
             break;
         }
         fflush(stdin);
@@ -38,8 +38,8 @@ int main (int argc, char** argv) {
         // cout << "HUST" << endl;
         // sleep(1); 
 
-        fixCmd(cmd); /* Chỉnh sửa câu lệnh tránh các lỗi nhập cách khoảng */
-        char **args =  separate_line(cmd); /* Chia câu lệnh */
+        //fixCmd(cmd); /* Chỉnh sửa câu lệnh tránh các lỗi nhập cách khoảng */
+        char **args =  separator_line(cmd); /* Chia câu lệnh */
             /**
              * VD: dir C:\Users\Admin .....
              * => args[0] : dir
