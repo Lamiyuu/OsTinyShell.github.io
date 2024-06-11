@@ -64,6 +64,7 @@ int execute(char ** args){
             return (*activate_command[i])(args);
         }
     }
+    printf("Not supported command. Please try again. \n");
     return 0;
 }
 
@@ -81,22 +82,22 @@ int size_of_command(){
 int help(char **args){
     if (args[1] == NULL) {
 	printf("Type \"help [command]\" for more information about a specific command.\n");
-	printf("Suppoted commands:\n cd\n date\n time\n dir\n cls\n echo\n del\n mkdir\n pc\n exit\n ");
+	printf("Supported commands:\n cd, date, time, dir, cls, echo, del, mkdir, pc, exit\n ");
 	printf("Usage:\n\t <command> [option]\n\tEXAMPLE: help cd\n");
 	printf("%-30s%s\n%-30s%s", " cd",
 	        "Change the current directory. You must write the new directory after this command.",
 		" ", "EXAMPLES: \"cd C:/\"\n\n");
 	printf("%-30s%s\n%-30s%s", " date",
-		"Show the today's date.",
+		"Show today's date.",
 		" ", "EXAMPLES: \"date\"\n\n");
 	printf("%-30s%s\n%-30s%s", " time",
-		"Show the current time.",
+		"Show current time.",
 		" ", "EXAMPLES: \"time\"\n\n");
 	printf("%-30s%s\n%-30s%s", " dir",
 		"Show all files and folders in the current directory.",
 		" ", "EXAMPLES: \"dir\"\n\n");
         printf("%-30s%s\n%-30s%s", " cls",
-		"Clear the console screen.",
+		"Clear console screen.",
             	" ", "EXAMPLES: \"cls\"\n\n");
         printf("%-30s%s\n%-30s%s", " echo",
 		"Print a message on the screen.",
@@ -245,18 +246,25 @@ int dir(char **args) {
             mbstowcs(char_date, date.c_str(), date.size() + 1);
             mbstowcs(char_time, time.c_str(), time.size() + 1);
 
-            if (data.dwFileAttributes == FILE_ATTRIBUTE_ARCHIVE) {
+            if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+                if (wcscmp(data.cFileName, L".") != 0 && wcscmp(data.cFileName, L"..") != 0) {
+                    wprintf(L"%-15ls%-15ls%-15ls%-15ls\n", char_date, char_time, L"<FOLDER>", data.cFileName);
+                }
+            } else {
                 wprintf(L"%-15ls%-15ls%-15ls%-15ls\n", char_date, char_time, L"<FILE>", data.cFileName);
-            }
-            if (data.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
-                wprintf(L"%-15ls%-15ls%-15ls%-15ls\n", char_date, char_time, L"<FOLDER>", data.cFileName);
             }
         } while (FindNextFileW(han, &data) != 0);
         FindClose(han);
         free(char_time);
         free(char_date);
+        free(cur_dir);
+        free(path);
         return EXIT_SUCCESS;
     } else {
+        free(char_time);
+        free(char_date);
+        free(cur_dir);
+        free(path);
         return EXIT_FAILURE;
     }
 }
