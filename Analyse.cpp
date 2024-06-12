@@ -8,11 +8,15 @@
 #include <psapi.h>
 #include <tlhelp32.h>
 #include "Command.h"
+#include <string> 
+#include <vector>
 
 #define MAX_CWD_LENS 128
 #define MAX_BUFFER_SIZE 64
 #define MAX_TOK_BUFSIZE 64
 #define TOKEN_DELIMETERS " \t\r\n\a"
+#define HISTORY_FILE "history.txt"
+#define MAX_LINE_LENGTH 1024
 
 using namespace std;
 

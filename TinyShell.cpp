@@ -9,7 +9,8 @@
  *      @02-06-2024
  * ----------------------------------------------------------------
  ******************************************************************/
-
+#include <string>
+#include <vector> 
 #include "Analyse.h"
 #include "Command.h"
 #include "Process.h"
@@ -35,8 +36,6 @@ int main (int argc, char** argv) {
         fflush(stdin);
         cin.getline(cmd, MAX_BUFFER_SIZE); /* Nhập lệnh command */
         cin.clear();
-        // cout << "HUST" << endl;
-        // sleep(1); 
 
         //fixCmd(cmd); /* Chỉnh sửa câu lệnh tránh các lỗi nhập cách khoảng */
         char **args =  separator_line(cmd); /* Chia câu lệnh */

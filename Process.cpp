@@ -8,7 +8,8 @@
 #include <psapi.h>
 #include <tlhelp32.h>
 #include <unordered_map>
-#include <string>
+#include <string> 
+#include <vector>
 #include "Analyse.h"
 #include "Command.h"
 #include "Conversion.h"
@@ -18,6 +19,8 @@ using namespace std;
 #define MAX_BUFFER_SIZE 64
 #define MAX_TOK_BUFSIZE 64
 #define TOKEN_DELIMETERS " \t\r\n\a"
+#define HISTORY_FILE "history.txt"
+#define MAX_LINE_LENGTH 1024
 
 HANDLE hForeProcess;
 std::unordered_map<DWORD, std::string> processStates;
@@ -30,9 +33,6 @@ std::unordered_map<DWORD, std::string> processStates;
  * Đón tín hiệu ngắt Ctrl + C
  **/
 void sighandler(int signum) {
-    /**
-     * Đón tín hiệu ngắt Ctrl + C
-     **/
     // printf("Caught signal %d, coming out...\n", signum);
     if (hForeProcess != NULL) {
         TerminateProcess(hForeProcess, 0);

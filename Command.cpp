@@ -7,6 +7,10 @@
 #include <sys/types.h>
 #include <psapi.h>
 #include <tlhelp32.h>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+#include <string>
 #include "Analyse.h"
 #include "Process.h"
 #include "Conversion.h"
@@ -15,6 +19,8 @@
 #define MAX_BUFFER_SIZE 64
 #define MAX_TOK_BUFSIZE 64
 #define TOKEN_DELIMETERS " \t\r\n\a"
+
+const std::string HISTORY_FILE = "history.txt";
 
 using namespace std;
 
@@ -49,22 +55,87 @@ int (*activate_command[])(char **) = {
   &time_cmd,
   &pc,
   &calc,
-  &runbat	  
-}; 
+  &runbat  
+};
 
+/*
+*Lưu lại lịch sử
+*/
+// Hàm ghi lịch sử lệnh vào tập tin
+int write_to_history(const string& command) {
+    ofstream history(HISTORY_FILE.c_str(), ios_base::app);
+    if (!history) {
+        cerr << "Error: Could not open history file for writing" << endl;
+        return 1;
+    }
+    history << command << endl;
+    return 0;
+}
+
+int print_history() {
+    ifstream history(HISTORY_FILE.c_str());
+    if (!history) {
+        cerr << "Error: Could not open history file for reading" << endl;
+        return 1;
+    }
+    string line;
+    int count = 1;
+    while (getline(history, line)) {
+        cout << count++ << ". " << line << endl;
+    }
+    return 0;
+}
+/*
+*Xóa lịch sử 
+*/
+// Xóa toàn bộ danh sách lịch sử
+int cls_history() {
+    ofstream history(HISTORY_FILE.c_str(), ios::trunc); // Mở file history.txt để ghi đè lên dữ liệu cũ
+    if (!history) {
+        cerr << "Error: Could not open history file for clearing" << endl;
+        return 1;
+    }
+    history.close(); // Đóng file
+    cout << "History cleared successfully" << endl;
+    return 0;
+}
 /**
  * Chạy lệnh với lệnh là arg[0] như cd, dir, exit, help
  **/
-int execute(char ** args){
+int execute(char** args){
     if (args[0] == NULL){
         return 0;
     }
-    for(int i=0; i < size_of_command() ; i++){
-        if(strcmp(args[0],command[i]) == 0){ /* Kiểm tra xem người dùng nhập lệnh nào trong tập lệnh */
+
+    // Kết hợp tất cả các tham số thành một chuỗi lệnh đầy đủ
+    string full_command = args[0];
+    for (int i = 1; args[i] != NULL; ++i) {
+        full_command += " ";
+        full_command += args[i];
+    }
+
+    // Ghi lệnh đầy đủ vào lịch sử
+    int result = write_to_history(full_command);
+    if (result != 0) {
+        return result; // Trả về kết quả từ hàm write_to_history
+    }
+
+    // Kiểm tra xem người dùng có muốn in lịch sử hay không
+    if (strcmp(args[0], "history") == 0) {
+        return print_history(); // Trả về kết quả từ hàm print_history
+    }
+
+    if (strcmp(args[0], "cls_history") == 0) {
+        return cls_history(); // Gọi hàm cls_history để xóa toàn bộ danh sách lịch sử
+    }
+
+    // Kiểm tra các lệnh khác
+    for(int i = 0; i < size_of_command(); i++){
+        if(strcmp(args[0], command[i]) == 0){
             return (*activate_command[i])(args);
         }
     }
-    printf("Not supported command. Please try again. \n");
+    cout << "Not supported command. Please try again." << endl;
     return 0;
 }
 
@@ -580,3 +651,4 @@ int runbat(char **args){
     }
     return 0;
 }
+

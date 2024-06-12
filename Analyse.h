@@ -12,6 +12,8 @@
 #include <sys/types.h>
 #include <psapi.h>
 #include <tlhelp32.h>
+#include <string> 
+#include <vector>
 #include "Command.h"
 
 #define MAX_CWD_LENS 128

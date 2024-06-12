@@ -13,7 +13,8 @@
 #include <psapi.h>
 #include <tlhelp32.h>
 #include "Analyse.h"
-
+#include <string> 
+#include <vector>
 #define MAX_CWD_LENS 128
 #define MAX_BUFFER_SIZE 64
 #define MAX_TOK_BUFSIZE 64
