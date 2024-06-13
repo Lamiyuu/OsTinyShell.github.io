@@ -182,13 +182,13 @@ int help(char **args){
 	printf("%-30s%s\n%-30s%s", " run",
 		"Run .bat file only.",
             	" ", "EXAMPLES: \"run [filename.bat]\"\n\n");
-        printf("%-30s%s\n%-30s%s\n%-30s%s", " pc",
+    printf("%-30s%s\n%-30s%s\n%-30s%s", " pc",
             	"Process.", " ",
             	"You must enter the options in the 2nd argument, such as fg, bg, all, find, kill, killid, suspend, resume",
             	" ", "EXAMPLES: \"pc bg\"\n\n");
-	printf("%-30s%s\n%-30s%s\n%-30s%s", " history",
+	printf("%-30s%s\n%-30s%s\n", " history",
             	"Show command history.", " ",
-            	"To clear the history, type "cls_history"\n\n");
+            	"To clear the history, type 'cls_history'\n\n");
 	printf("%-30s%s", " exit", "Exit this tiny shell.\n");
     }
     else if(!strcmp(args[1],"cd")) {
@@ -257,7 +257,7 @@ int help(char **args){
     }
     else if(!strcmp(args[1],"history")){
         cout << "Show the list of commands inputed." << endl;
-        cout << "To clear the list, type "cls_history"." << endl; 
+        cout << "To clear the list, type 'cls_history'." << endl; 
     }
     return 0;
 }
@@ -658,4 +658,3 @@ int runbat(char **args){
     }
     return 0;
 }
-
