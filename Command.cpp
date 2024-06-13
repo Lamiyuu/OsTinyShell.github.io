@@ -184,7 +184,7 @@ int help(char **args){
             	" ", "EXAMPLES: \"run [filename.bat]\"\n\n");
     printf("%-30s%s\n%-30s%s\n%-30s%s", " pc",
             	"Process.", " ",
-            	"You must enter the options in the 2nd argument, such as fg, bg, all, find, kill, killid, suspend, resume",
+            	"You must enter the options in the 2nd argument, such as fg, bg, all, find, kill, killid, suspend, resume. bgTofg",
             	" ", "EXAMPLES: \"pc bg\"\n\n");
 	printf("%-30s%s\n%-30s%s\n", " history",
             	"Show command history.", " ",
@@ -249,6 +249,7 @@ int help(char **args){
         cout << "        killid  Terminate a program by process id" << endl;
         cout << "        bg      Run a program in background mode by path to program" << endl;
 	    cout << "        fg      Run a program in foregound mode by path to program" << endl;
+	    cout << "        bgTofg  Switch a program from background mode to foreground mode" << endl;
         cout << "EXAMPLE: \"pc fg C:\\Users\\Admin\\ABC\"" << endl;
     }
     else if(!strcmp(args[1],"exit")){
