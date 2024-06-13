@@ -249,7 +249,7 @@ int help(char **args){
         cout << "        killid  Terminate a program by process id" << endl;
         cout << "        bg      Run a program in background mode by path to program" << endl;
 	    cout << "        fg      Run a program in foregound mode by path to program" << endl;
-	    cout << "        bgTofg  Switch a program from background mode to foreground mode" << endl;
+	    cout << "        bgTofg  Switch a program from background mode to foreground mode, you need to input the process ID" << endl;
         cout << "EXAMPLE: \"pc fg C:\\Users\\Admin\\ABC\"" << endl;
     }
     else if(!strcmp(args[1],"exit")){
